@@ -8,7 +8,6 @@ using System.Windows.Navigation;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
 using MWBCameraDemo.Resources;
-
 using System.Resources;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -17,7 +16,6 @@ using System.Windows.Resources;
 using System.IO;
 using System.Windows.Media.Imaging;
 using System.Reflection;
-
 using Windows.Phone.Media.Capture;
 using Windows.Phone.Media.Devices;
 using System.Threading.Tasks;
@@ -25,20 +23,15 @@ using Windows.Foundation;
 using System.Diagnostics;
 using System.Windows.Media;
 using Microsoft.Devices;
-
 using System.Threading;
 using System.Windows.Threading;
 using System.ComponentModel;
-
 using BarcodeLib;
 
 namespace MWBCameraDemo
 {
-
-
     public partial class MainPage : PhoneApplicationPage
     {
-
         public const int MAX_RESOLUTION = 1280 * 768;
 
         public static PhotoCaptureDevice cameraDevice;
@@ -49,10 +42,6 @@ namespace MWBCameraDemo
 
         private async Task InitializeCamera(CameraSensorLocation sensorLocation)
         {
-
-
-
-
             Windows.Foundation.Size captureResolution = new Windows.Foundation.Size(640, 480);
             Windows.Foundation.Size previewResolution = new Windows.Foundation.Size(640, 480);
 
@@ -62,11 +51,9 @@ namespace MWBCameraDemo
             double minDiff = 9999999;
             int minIndex = -1;
 
-
             double bestAspect = 1000;
 
             int bestAspectResIndex = 0;
-
 
             double aspect = App.Current.Host.Content.ActualHeight / App.Current.Host.Content.ActualWidth;
 
@@ -82,7 +69,6 @@ namespace MWBCameraDemo
                 double diff = aspect - resAspect;
                 if (diff < 0)
                     diff = -diff;
-
 
                 if (diff < bestAspect)
                 {
@@ -169,11 +155,7 @@ namespace MWBCameraDemo
                                     break;
                                 }
                             }
-
-
-
                         }
-
 
                         if (bestAspectResIndex >= 0)
                             try
@@ -184,7 +166,6 @@ namespace MWBCameraDemo
                             {
 
                             }
-
                     }
 
                     System.Diagnostics.Debug.WriteLine("Preview resolution: " + d.PreviewResolution);
@@ -192,18 +173,20 @@ namespace MWBCameraDemo
                     d.SetProperty(KnownCameraGeneralProperties.EncodeWithOrientation,
                                   d.SensorLocation == CameraSensorLocation.Back ?
                                   d.SensorRotationInDegrees : -d.SensorRotationInDegrees);
-
-
+                    try
+                    {
+                        d.SetProperty(KnownCameraPhotoProperties.FlashMode, FlashState.Off);
+                        d.SetProperty(KnownCameraPhotoProperties.SceneMode, CameraSceneMode.Macro);
+                    }
+                    catch
+                    {
+                        // one or more properties may not be supported
+                    }
+                    
                     cameraDevice = d;
                 }
 
                 cameraDevice.PreviewFrameAvailable += new TypedEventHandler<ICameraCaptureDevice, Object>(cam_PreviewFrameAvailable);
-
-
-                IReadOnlyList<object> flashProperties = PhotoCaptureDevice.GetSupportedPropertyValues(sensorLocation, KnownCameraAudioVideoProperties.VideoTorchMode);
-
-
-
 
                 videoBrush.SetSource(cameraDevice);
                 DispatcherTimer focusTimer = new DispatcherTimer();
@@ -225,9 +208,7 @@ namespace MWBCameraDemo
             {
                 Debug.WriteLine("Camera initialization error: " + e.Message);
             }
-
         }
-
 
         private void bw_DoWork(object sender, DoWorkEventArgs e)
         {
@@ -244,7 +225,6 @@ namespace MWBCameraDemo
                 long timeNow = DateTime.Now.Ticks;
                 long timeDifference = (timeNow - timePrev) / 10000;
                 System.Diagnostics.Debug.WriteLine("frame time: {0}", timeDifference);
-
             }
 
             lastTime = DateTime.Now;
@@ -261,16 +241,11 @@ namespace MWBCameraDemo
                     MessageBox.Show(resultString, typeName, new MessageBoxButton() { });
                     isProcessing = false;
                 });
-
-
             }
             else
             {
                 isProcessing = false;
             }
-
-           
-
         }
 
         class ThreadArguments
@@ -299,13 +274,8 @@ namespace MWBCameraDemo
             ta.pixels = pixels;
            
             bw.RunWorkerAsync(ta);
-
-
         }
 
-
-
-       
         // Constructor
         public MainPage()
         {
@@ -321,27 +291,18 @@ namespace MWBCameraDemo
 
             System.Diagnostics.Debug.WriteLine("Lib version: " +libVersion);
            // System.Diagnostics.Debugger.Log(1, "1","Lib version: " + libVersion);
-           
-
-           
-
         }
 
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
-           
             base.OnNavigatedTo(e);
             InitializeCamera(CameraSensorLocation.Back);
 
             MWOverlay.addOverlay(canvas);
-
         }
-
-
 
         protected override void OnNavigatingFrom(System.Windows.Navigation.NavigatingCancelEventArgs e)
         {
-
             MWOverlay.removeOverlay();
             base.OnNavigatingFrom(e);
         }
@@ -355,32 +316,24 @@ namespace MWBCameraDemo
 
             if ((e.Orientation & PageOrientation.LandscapeLeft) == (PageOrientation.LandscapeLeft))
             {
-
                 videoBrush.RelativeTransform = new CompositeTransform()
                 {
                     CenterX = 0.5,
                     CenterY = 0.5,
                     Rotation = 0
                 };
-
-
             }
 
             else
                 if ((e.Orientation & PageOrientation.LandscapeRight) == (PageOrientation.LandscapeRight))
                 {
-
                     videoBrush.RelativeTransform = new CompositeTransform()
                     {
                         CenterX = 0.5,
                         CenterY = 0.5,
                         Rotation = 180
                     };
-
-
                 }
-
-
         }
 
         // Sample code for building a localized ApplicationBar
